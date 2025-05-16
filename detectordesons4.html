@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sound Detector - Teachable Machine</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f4f4f9; }
+    .container { background: #fff; padding: 20px 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); text-align: center; }
+    button { padding: 10px 20px; background-color: #007BFF; color: #fff; border: none; border-radius: 5px; cursor: pointer; }
+    button:hover { background-color: #0056b3; }
+    #status { margin-top: 10px; }
+    #result { margin-top: 10px; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Sound Detector</h1>
+    <button id="startButton">Start Detection</button>
+    <div id="status">Click "Start Detection" to begin.</div>
+    <div id="result">Result: <span id="prediction">None</span></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/sound"></script>
+  <script>
+    let model, recognizer;
+
+    async function loadModel() {
+      const URL = "YOUR_MODEL_URL/model.json"; // Replace with your model URL
+      model = await tmSound.createModel(URL);
+      recognizer = model.createRecognition();
+      document.getElementById("status").innerText = "Model Loaded. Ready to Detect.";
+    }
+
+    async function startDetection() {
+      if (!recognizer) await loadModel();
+      recognizer.listen(result => {
+        const { label, confidence } = result[0];
+        document.getElementById("prediction").innerText = `${label} (${(confidence * 100).toFixed(2)}%)`;
+      });
+    }
+
+    document.getElementById("startButton").addEventListener("click", startDetection);
+
+    window.addEventListener("load", loadModel);
+  </script>
+</body>
+</html>
