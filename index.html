@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<<<<<<< HEAD
 <html>
 <head>
     <title>Detector de Estalos</title>
@@ -51,3 +52,154 @@
     </script>
 </body>
 </html>
+=======
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detector de Sons</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f4f4f9;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      text-align: center;
+      max-width: 500px;
+      width: 90%;
+    }
+    button {
+      padding: 12px 24px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 10px 0;
+    }
+    button:disabled {
+      background-color: #cccccc;
+    }
+    #status {
+      margin: 15px 0;
+      color: #666;
+    }
+    #result {
+      font-weight: bold;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Detector de Sons</h1>
+    <button id="startBtn" disabled>Carregando...</button>
+    <div id="status">Inicializando...</div>
+    <div id="result">Resultado: <span id="prediction">-</span></div>
+  </div>
+
+  <!-- Scripts EM ORDEM CORRETA -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.18.0/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/sound@1.0.0/dist/teachablemachine-sound.min.js"></script>
+
+  <script>
+    // Verificar se o tmSound está carregado
+    if (!window.tmSound) {
+      document.getElementById('status').innerHTML = 
+        'Erro: Biblioteca não carregada. Recarregue a página.';
+    }
+
+    const startBtn = document.getElementById('startBtn');
+    const statusEl = document.getElementById('status');
+    const predictionEl = document.getElementById('prediction');
+    
+    let model, recognizer;
+    let isListening = false;
+
+    async function init() {
+      try {
+        // 1. Carregar modelo
+        statusEl.textContent = 'Carregando modelo...';
+        model = await tmSound.load('./model/model.json', './model/metadata.json');
+        recognizer = model.createRecognition();
+        
+        // 2. Configurar UI
+        startBtn.textContent = 'Iniciar Detecção';
+        startBtn.disabled = false;
+        statusEl.textContent = 'Pronto para detectar!';
+        
+        // 3. Event listeners
+        startBtn.addEventListener('click', toggleDetection);
+        
+      } catch (error) {
+        console.error('Erro na inicialização:', error);
+        statusEl.innerHTML = `Erro: ${error.message}`;
+      }
+    }
+
+    async function toggleDetection() {
+      if (isListening) {
+        await stopDetection();
+      } else {
+        await startDetection();
+      }
+    }
+
+    async function startDetection() {
+      try {
+        isListening = true;
+        startBtn.disabled = true;
+        statusEl.textContent = 'Acessando microfone...';
+        
+        await recognizer.listen(async (predictions) => {
+          const top = predictions[0];
+          predictionEl.textContent = `${top.className} (${Math.round(top.probability * 100)}%)`;
+        }, {
+          overlapFactor: 0.5,
+          probabilityThreshold: 0.75
+        });
+        
+        startBtn.textContent = 'Parar Detecção';
+        startBtn.disabled = false;
+        statusEl.textContent = 'Ouvindo...';
+        
+      } catch (error) {
+        console.error('Erro no microfone:', error);
+        statusEl.innerHTML = `Erro no microfone: ${error.message}`;
+        resetUI();
+      }
+    }
+
+    async function stopDetection() {
+      try {
+        await recognizer.stop();
+        statusEl.textContent = 'Detecção parada';
+      } catch (error) {
+        console.error('Erro ao parar:', error);
+      } finally {
+        resetUI();
+      }
+    }
+
+    function resetUI() {
+      isListening = false;
+      startBtn.textContent = 'Iniciar Detecção';
+      startBtn.disabled = false;
+    }
+
+    // Iniciar quando a página carregar
+    window.addEventListener('load', init);
+  </script>
+</body>
+</html>
+>>>>>>> 0950e491bd50051c9f5b6062fed040b61c9c2c7e
