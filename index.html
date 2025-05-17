@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Detector de Estalos</title>
+    <style>
+        body { font-family: Arial; text-align: center; }
+        #result { font-size: 24px; margin: 20px; }
+        button { padding: 15px; font-size: 18px; }
+    </style>
+</head>
+<body>
+    <button id="startBtn">Iniciar Detecção</button>
+    <div id="result">Status: Aguardando...</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.3.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/speech-commands"></script>
+
+    <script>
+        let recognizer;
+        const modelURL = 'INSIRA_SUA_URL_DO_MODELO_AQUI';
+
+        async function init() {
+            recognizer = speechCommands.create(
+                'BROWSER_FFT',
+                null,
+                modelURL + 'model.json',
+                modelURL + 'metadata.json'
+            );
+            
+            await recognizer.ensureModelLoaded();
+        }
+
+        document.getElementById('startBtn').addEventListener('click', async () => {
+            try {
+                await init();
+                recognizer.listen(async ({ scores }) => {
+                    const prediction = scores.indexOf(Math.max(...scores));
+                    if(prediction === 0) {
+                        document.getElementById('result').textContent = 'ESTALO DETECTADO!';
+                        // Adicione aqui ações ao detectar estalo
+                    }
+                }, {
+                    includeSpectrogram: true,
+                    probabilityThreshold: 0.9,
+                    invokeCallbackOnNoiseAndUnknown: true
+                });
+            } catch (error) {
+                console.error('Erro:', error);
+            }
+        });
+    </script>
+</body>
+</html>
